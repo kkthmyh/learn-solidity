@@ -79,9 +79,9 @@ contract StateVariables{
 }
 ```
 
-#  全局变量
+#  5 全局变量
 
-##  4.2 代码分析
+##  5.2 代码分析
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -104,3 +104,99 @@ contract GlobalVariables{
 }
 ```
 
+#  6 只读函数
+
+##  6.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity 0.8.7;
+
+contract ViewAndPureFunction{
+
+    uint public num;
+    // view 可以读取链上数据
+    function viewFunc() external view returns(uint) {
+        return num;
+    }
+}
+```
+
+#  7 常量
+
+##  7.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Constants{
+
+    address public constant MY_ADDRESS = 0x811A7FcF536550541Fd7A6867F716BeAfbB1Ed16;
+
+    uint public MY_UINT = 123;
+
+}
+
+```
+
+
+
+#  8 报错控制
+
+##  8.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+// require 当表达式为true时,执行require后代码,否则输出定义的报错信息,返还gas并回滚状态
+// revert  直接抛出错误和java中的throw语句类似,返还gas并回滚状态
+// assert  断言
+// 0.8版本以上的自定义error,可以节约gas fee
+
+contract Errors{
+
+    uint public num = 10;
+
+    function testRequire(uint x) external view returns(uint){
+        require(x > 10,"x<=10,please check!!!");
+        return x;
+    } 
+
+    // 自定义异常
+    
+    error MyError(address add,uint x);
+
+    function testRevert(uint x) external view returns(uint) {
+        if (x <= 10) {
+            revert("x<=10,please check!!!");
+        }else if (x > 20) {
+            revert MyError(msg.sender,x);
+        }
+        return x;
+    }
+
+    function testAssert(uint x) external view returns(uint){
+        assert(x==num);
+        return x;
+    }
+
+}
+
+```
+
+
+
+#  9 函数修改器
+
+##  9.1 代码分析
+
+```solidity
+```
+
+
+
+#  10 
+
+##  
