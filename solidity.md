@@ -193,10 +193,178 @@ contract Errors{
 ##  9.1 代码分析
 
 ```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+// 函数修改器类似于抽取公共代码片段
+contract FunctionModifier{
+
+    uint public num = 10;
+
+    // function test1() external {
+    //     require(num<10,"num>=10 please check");
+    // }
+
+    // function test2() external {
+    //     require(num<10,"num>=10 please check");
+    // }
+
+    // 对于上述的两个function 中的x<10 可以抽取成函数修改器
+
+    modifier MyModifier(uint x) {
+        require(x<10,"x>=10 please check");
+        _;
+    }
+
+    function test1(uint x) external MyModifier(x){
+      num += x;
+    }
+
+           
+    function test2(uint x) external MyModifier(x){
+        num += x;
+
+    }
+        
+}
+
 ```
 
+#  10 构造函数
+
+##  10.1 代码分析
+
+```solidity
+
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+// 构造器，只在合约部署时执行一次
+contract Constructor{
+
+    address public owner;
+
+    uint public x;
+
+    constructor(uint _x){
+        owner = msg.sender;
+        x = _x;
+    }
+
+}
 
 
-#  10 
+```
 
-##  
+#  11 练习1 权限管理合约
+
+##  11.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Ownable {
+
+    address public owner;
+	// 构造器
+    constructor(){
+        owner = msg.sender;
+    }
+
+	// 代码修改器
+    modifier OnlyOwner() {
+        require(msg.sender == owner,"Only owner can call");
+        _;
+    }
+
+	// 权限转移
+    function setOwner(address _addr) external OnlyOwner{
+        owner = _addr;
+    }
+
+    function anyOneCanCall() external{
+        //code
+    }
+
+    function onlyOwnerCanCall() external OnlyOwner {
+        //code
+    }
+        
+}
+```
+
+#  12 函数返回
+
+##  12.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract FunctionOutputs{
+    // 可以return多个参数
+    function returnMany() public pure returns(uint,bool){
+        return (1,false);
+    }
+    // 对return的参数进行命名
+    function named() public returns(uint x,bool b) {
+        return (1,false);
+    }
+
+    // 隐式返回
+    function assigned() public pure returns(uint x,bool b) {
+        x = 1;
+        b = false;
+    }
+
+    function test() public pure{
+        // 接收返回值
+    //    (uint x , bool b) =  returnMany();
+       // 接收部分返回值，可以节约gas
+       (, bool b) = returnMany();
+    }
+
+}
+
+
+```
+
+#  13 数组
+
+##  13.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Array{
+    // 动态数组
+    uint[] public nums = [1,2,3];
+    // 定长数组
+    uint[3] public numsFixed = [4,5,6];
+
+    function examples() external {
+        // 获取长度
+        uint l = nums.length; // 3
+        // 获取元素
+        uint i = nums[1]; // 2
+        // push 元素
+        nums.push(4); // [1,2,3,4]
+        // pop 元素
+        nums.pop(); // [1,2,3]
+        // 删除元素，被删除的元素被置为默认值
+        delete nums[1]; // [1,0,2]
+
+
+        // 创建内存数组 类似于java
+        // 内存中不可创建动态数组，因此该数组不可以使用pop等改变数组长度的function
+        uint [] memory nums2 = new uint[](2);
+        
+    }
+
+    function test() external view returns(uint[] memory) {
+        return nums;
+    }
+
+}
+```
+
