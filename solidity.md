@@ -518,5 +518,243 @@ contract Helper{
 }
 ```
 
+#  17 存储位置
 
+##  17.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+// 智能合约中数据的存储位置有 storage memory calldata 
+// storage => 存储在链上可以改变状态变量的值
+// memory => 存储在内存中方法调用完成即销毁，不能改变状态变量的值
+// calldata => 和memory类似，但是只能定义在函数的输入参数中
+contract DataLocations{
+
+    struct Mystruct{
+        uint foo;
+        string text; 
+    }
+
+    mapping(address => Mystruct) public myStructs;
+
+    function emamples() external {
+        myStructs[msg.sender] = Mystruct(123,"foo");
+        Mystruct storage my = myStructs[msg.sender];
+        my.text = "java";
+
+    }
+
+}
+```
+
+
+
+#  18 触发事件
+
+##  18.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Event{
+
+    event Log(string message,uint x);
+    // 使用indexed标记，可以被区块链索引，借助web3或者ethers sdk可以查询
+    event Log(address indexed addr,string message,uint x);
+
+    function example() external{
+        emit Log("this is a event",123);
+        emit Log(msg.sender,"this is a indexed msg",123);
+    }
+}
+```
+
+
+
+#  19 多线继承
+
+##  19.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+//    x
+//   / \
+//  y   |
+//   \ /
+//    z
+//  上述是一个多线继承的场景，z继承x也继承y，在写合约时继承关系为x y z
+
+contract X {
+
+    function foo() external pure virtual returns(string memory){
+        return "X";
+    }
+
+    function bal() external pure virtual returns(string memory){
+        return "X";
+    }
+
+    function x() external pure returns(string memory){
+        return "X";
+    }
+
+}
+
+
+contract Y is X{
+
+    function foo() external pure virtual override returns(string memory){
+        return "Y";
+    }
+
+    function bal() external pure virtual override returns(string memory){
+        return "Y";
+    }
+
+    function y() external pure returns(string memory){
+        return "Y";
+    }
+}
+
+
+contract Z is X,Y{
+
+    function foo() external pure virtual override(X,Y) returns(string memory){
+        return "Z";
+    }
+
+    function bal() external pure virtual override(X,Y) returns(string memory){
+        return "Z";
+    }
+
+}
+
+
+```
+
+#  20 父级合约构造函数
+
+##  20.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract A {
+    string public name;
+
+    constructor(string memory _name) {
+        name = _name;
+    }
+}
+
+contract B {
+    string public text;
+
+    constructor(string memory _text) {
+        text = _text;
+    }
+}
+// 第一种调用父级构造器方法
+contract C is A("A"),B("B"){
+
+}
+// 第二种调用父级构造器方法
+contract D is A , B{
+
+    constructor (string memory name,string memory text) A(name) B(text){
+        
+    }
+
+}
+
+```
+
+#  21 可视范围
+
+##  21.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+// private 只在合约内部
+// internal 只在合约内部和继承
+// public 内外都可见
+// external 外部可见
+contract VisibilityBase {
+    uint private x = 0;
+    uint internal y = 1;
+    uint public z = 2;
+
+    function privateFunc() private pure {
+
+    }
+
+    function internalFunc() internal pure {
+
+    }
+
+    function publicFunc() public pure {
+
+    }
+
+    function externalFunc() external pure {
+
+    }
+
+}
+
+```
+
+#  22 不可变量
+
+##  22.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Immutable{
+    // immutable修饰的状态变量必须赋初始值
+    address public immutable owner = msg.sender;
+
+    uint public x;
+
+    function foo() external{
+        require(msg.sender == owner,"not owner");
+        x += 1;
+    }
+}
+```
+
+#  23 payable 关键词
+
+## 23.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Payable{
+	// payable 修饰表示可以发送ETH主币
+    address payable public owner;
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+	// 合约可以接受ETH主币
+    function send() external payable{
+
+    }
+
+    function getBalance() external view returns(uint) {
+        return address(this).balance;
+    }
+}
+```
 
