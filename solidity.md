@@ -368,3 +368,155 @@ contract Array{
 }
 ```
 
+#  14 映射
+
+##  14.1代码分析
+
+```solidity
+
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+// 类似于java中的HashMap k-v键值对
+contract Mapping {
+    // 定义简单映射
+    mapping(address => uint) public balances;
+    // 定义嵌套映射
+    mapping(address => mapping(address => bool)) public isFriend;
+
+    function examples() external {
+        // 映射赋值
+        balances[msg.sender] = 123;
+        // 获取映射的值
+        uint bal = balances[msg.sender];
+        uint bal2 = balances[address(1)];
+        // 删除映射
+        delete balances[msg.sender];
+        // 嵌套映射的定义
+        isFriend[msg.sender][address(this)] = true;
+
+    }
+
+}   
+```
+
+#  15 结构体
+
+##  15.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Structs{
+    // 定义Car结构体
+    struct Car{
+        string name;
+        uint year;
+        address owner;
+    }
+    // 定义结构体状态变量
+    Car public car;
+    Car[] public cars;
+    mapping(address => Car[]) public carOwners;
+
+    function examples() external {
+        // 结构体赋值1
+        Car memory car1 = Car("toyota",1999,msg.sender);
+        // 结构体赋值2
+        Car memory car2 = Car({name:"audi",year:2000,owner:msg.sender});
+        // 结构体赋值3
+        Car memory car3;
+        car3.name = "wl";
+        car3.year = 2022;
+        car3.owner = msg.sender;
+
+        // 结构体添加到数组中
+        cars.push(car1);
+        cars.push(car2);
+        cars.push(car3);
+
+
+        // 获取结构体
+        Car memory _car = cars[1];
+        
+    }
+
+}
+```
+
+#  16 通过代理合约部署合约
+
+##  16.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+
+contract TestContract1{
+
+    address public owner = msg.sender;
+
+    function setOwner(address addr) external{
+        require(msg.sender == addr,"not owner");
+        owner = addr;
+    }
+
+}
+
+contract TestContract2{
+    address public owner = msg.sender;
+    uint public value = msg.value;
+    uint public x;
+    uint public y;
+
+    constructor(uint _x,uint _y) payable{
+        x = _x;
+        y = _y;
+    }
+
+}
+
+
+contract Proxy{
+
+    fallback() external payable {}
+
+    event Deploy(address);
+
+    function deploy(bytes memory _code) external payable returns(address addr) {
+
+        assembly{
+        addr := create(callvalue(),add(_code,0x20),mload(_code))
+        }
+        require(addr != address(0),"deploy failed");
+        emit Deploy(addr);
+    }
+
+    function execute(address _target,bytes memory _data) external payable{
+        (bool success , ) = _target.call{value:msg.value}(_data);
+        require(success,"failed");
+    }
+
+}
+
+contract Helper{
+    function getByteCode1() external pure returns(bytes  memory) {
+        bytes memory bytecode = type(TestContract1).creationCode;
+        return bytecode;
+    }
+    function getByteCode2(uint _x,uint _y) external pure returns (bytes memory) {
+        bytes memory bytecode = type(TestContract2).creationCode;
+        return abi.encodePacked(bytecode,abi.encode(_x,_y));
+    }
+
+     function getCallData(address _owner) external pure returns (bytes memory) {
+        bytes memory bytecode = type(TestContract2).creationCode;
+        return abi.encodeWithSignature("setOwner(address)",_owner);
+    }
+
+}
+```
+
+
+
