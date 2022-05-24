@@ -943,6 +943,75 @@ contract Call {
 
 
 
+#  28 委托调用
+
+##  28.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+// 调用合约和被调用合约参数列表需要相同
+// 被调用合约状态变量不会改变 调用合约状态变量会改变
+contract TestDelegateCall {
+
+    uint public num;
+    address public sender;
+    uint public value;
+
+    function setVar(uint _num) external payable {
+        num = _num;
+        sender = msg.sender;
+        value = msg.value;
+    }
+}
+
+contract DelegateCall {
+    uint public num;
+    address public sender;
+    uint public value;
+
+    function setVar_(address _test, uint _num) external payable {
+        (bool success , bytes memory data) = _test.delegatecall(abi.encodeWithSelector(TestDelegateCall.setVar.selector, _num));
+        require(success, "fail request");
+    }
+}
+
+```
+
+#  29 工厂合约
+
+## 29.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Account {
+    address public bank;
+    address public owner;
+
+    constructor(address _owner) payable{
+        bank = msg.sender;
+        owner = _owner;
+    }
+}
+
+
+contract AccountFactory {
+
+    Account[] public accounts;
+
+    function createAcccount(address _owner) external payable {
+       Account account =  new Account{value:111}(_owner);
+       accounts.push(account);
+    }
+
+}
+
+```
+
+
+
 
 
 
