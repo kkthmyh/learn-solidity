@@ -1010,6 +1010,58 @@ contract AccountFactory {
 
 ```
 
+#  30 库合约
+
+##  30.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+// 返回两数最大值
+
+library Math {
+    function max(uint x,uint y) internal returns(uint) {
+        return x >= y?x : y;
+    }
+}
+
+contract TestLib {
+
+    function getMax(uint x,uint y) external returns(uint){
+        return Math.max(x,y);
+    }
+        
+}
+
+```
+
+
+
+#  31 哈希算法
+
+##  31.1 代码分析
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
+
+contract Hash{
+    // keccak256是solidity内置的hash算法
+    // encodePacked不会补零，可能导致hash碰撞
+    function testHash1(string memory _text,uint _x,address _address) external pure returns(bytes32) {
+       return keccak256(abi.encodePacked(_text,_x,_address));
+    }
+     // encodePacked会补零，不会导致hash碰撞，推荐此打包方式
+    function testHash2(string memory _text,uint _x,address _address) external pure returns(bytes32) {
+       return keccak256(abi.encode(_text,_x,_address));
+    }
+}
+
+```
+
+
+
 
 
 
